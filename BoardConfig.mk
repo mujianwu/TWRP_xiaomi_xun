@@ -39,31 +39,44 @@ TARGET_USES_UEFI := true
 TARGET_BOARD_PLATFORM := bengal
 
 # Kernel
-BOARD_KERNEL_CMDLINE          := 2000 disable_dma32=on bootconfig
-BOARD_KERNEL_CMDLINE          += androidboot.selinux=permissive
-BOARD_KERNEL_BASE             := 0x00000000
-BOARD_KERNEL_PAGESIZE         := 4096
-TARGET_KERNEL_ARCH            := arm64
-TARGET_KERNEL_HEADER_ARCH     := arm64
-BOARD_KERNEL_IMAGE_NAME       := Image
-BOARD_BOOT_HEADER_VERSION     := 4
-TARGET_KERNEL_CLANG_COMPILE   := true
-TARGET_PREBUILT_KERNEL        := $(DEVICE_PATH)/prebuilt/kernel_empty
-BOARD_MKBOOTIMG_ARGS          += --header_version $(BOARD_BOOT_HEADER_VERSION)
-BOARD_MKBOOTIMG_ARGS          += --pagesize $(BOARD_KERNEL_PAGESIZE)
+BOARD_KERNEL_IMAGE_NAME := Image
+BOARD_BOOT_HEADER_VERSION := 4
+BOARD_USES_GENERIC_KERNEL_IMAGE := true
+BOARD_RAMDISK_USE_LZ4 := true
+BOARD_KERNEL_SEPARATED_DTBO := true
+BOARD_KERNEL_CMDLINE := \
+	video=vfb:640x400,bpp=32,memsize=3072000 \
+	qcom_geni_serial.con_enabled=0 \
+        androidboot.selinux=permissive
 
+BOARD_BOOTCONFIG := \
+	androidboot.hardware=qcom
+	androidboot.memcg=1 \
+	androidboot.load_modules_parallel=false \
+	androidboot.usbcontroller=4e00000.dwc3
+
+BOARD_KERNEL_PAGESIZE := 4096
+BOARD_KERNEL_BASE := 0x00000000
+BOARD_KERNEL_OFFSET := 0x00008000
+BOARD_RAMDISK_OFFSET := 0x01000000
+BOARD_KERNEL_TAGS_OFFSET := 0x00000100
+BOARD_DTB_OFFSET := 0x01f00000
+
+BOARD_MKBOOTIMG_ARGS += --kernel_offset $(BOARD_KERNEL_OFFSET)
+BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
+BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
+BOARD_MKBOOTIMG_ARGS += --dtb_offset $(BOARD_DTB_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
-BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE) --board ""
 
-# Kenel dtb
+TARGET_FORCE_PREBUILT_KERNEL := true
+TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel_empty
+
+# Kernel dtb
 TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb
 BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
 
-# Kenel dtbo
+# Kernel dtbo
 BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
-
-# Ramdisk use lz4
-BOARD_RAMDISK_USE_LZ4 := true
 
 # A/B
 BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
